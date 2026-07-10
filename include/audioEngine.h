@@ -3,6 +3,9 @@
 // Headerfile : zorg dat headers altijd maar 1x mee worden genomen
 #pragma once
 
+#include "audioDeviceManager.h"
+#include "audioVolumeController.h"
+
 // class AudioEngine met void functie start (public)
 class AudioEngine
 {
@@ -14,6 +17,10 @@ class AudioEngine
 
     private:
         // bool running die begint op false
+        //10-7-26: bool running = false;
+        AudioDeviceManager deviceManager;
+        AudioVolumeController volumeController;
+
         bool running = false;
 };
 

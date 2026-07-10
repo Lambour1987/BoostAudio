@@ -24,4 +24,5 @@ add_executable(
     src/audioEngine.cpp
     src/audioDeviceManager.cpp
     src/dsp.cpp
+    src/audioVolumeController.cpp
 )

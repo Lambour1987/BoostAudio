@@ -18,6 +18,7 @@
 //eigen headers
 #include "audioEngine.h"
 #include "audioDeviceManager.h"
+#include "audioVolumeController.h"
 
 using namespace std;
 
@@ -39,20 +40,27 @@ void AudioEngine::start()
     // }
 
     // Maak een object aan van de AudioDeviceManager en noem deze manager
-    AudioDeviceManager manager;
+    // 10-7-26 kan weg: AudioDeviceManager deviceManager;
 
     // 7-7-2026: Belangrijk: Momenteel (als deze functie onder start() staat dan is de levensduur van
     // een object manager heel kort. Na het eindegen van de functie wordt manager vernietitgd. Voor testen prima
     // maar in de toekomst moet de AudioEngine de manager bezitten)
     // roep op dit object de memberfunctie listdevices aan();
-    //7-7-26: Gewijzigd van manager.listDevices(); naar
-    manager.getDefaultDevice();
+    //7-7-26: Gewijzigd van manager.listDevices(); naar 
+    deviceManager.getDefaultDevice();
 
-    //10-7-2026
-    cout << "Huidig volume: "<< manager.getVolume() <<endl;
+    //10-7-26: Kan weg AudioVolumeController volumeController;
+    volumeController.setEndpointVolume(
+        deviceManager.getEndpointVolume());
+    //10-7-2026: gewijzigd van
+    // cout << "Huidig volume: "<< manager.getVolume() <<endl;
+    cout << "Huidig volume: "<< volumeController.getVolume() <<endl;
 
     //8-7-2026
-    manager.setVolume(0.8f);
+    volumeController.setVolume(0.8f);
+
+    //10-7-2026
+    volumeController.setMute(true);
     
     //MessageBoxA()
     MessageBoxA(NULL, "BoostAudio draait", "Info", MB_OK);
@@ -66,3 +74,4 @@ void AudioEngine::stop()
     cout<<"AudioEngine gestopt!"<<endl;
 
 }
+

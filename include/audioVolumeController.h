@@ -20,3 +20,24 @@
 //     private:
 //         IAudioEndpointVolume* endpointVolume = nullptr;    
 // };
+
+#pragma once
+
+#include <endpointvolume.h>
+
+class AudioVolumeController
+{
+    public:
+        AudioVolumeController();
+        ~AudioVolumeController();
+
+        void setVolume(float volume);
+        float getVolume();
+        void setMute(bool mute);
+
+        void setEndpointVolume(IAudioEndpointVolume*volume);
+
+
+    private:
+        IAudioEndpointVolume* endpointVolume = nullptr;
+};

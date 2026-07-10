@@ -14,7 +14,6 @@
 
 #include <propsys.h>
 //t.b.v. juiste audio device kiezen.
-#include <endpointvolume.h>
 
 using namespace std;
 
@@ -155,31 +154,31 @@ void AudioDeviceManager::listDevices()
         //8-7-2026: regel verwijderen: want zit nu in de class IAudioEndpointVolume* endpointVolume = nullptr;
 
         //7-7-2026: Weggehaald 'HRESULT': HRESULT hr = device->Activate(
-        hr = device->Activate
-        (
-            __uuidof(IAudioEndpointVolume),
-            CLSCTX_ALL,
-            NULL,
-            (void**)&endpointVolume
-        );
+        // hr = device->Activate
+        // (
+        //     __uuidof(IAudioEndpointVolume),
+        //     CLSCTX_ALL,
+        //     NULL,
+        //     (void**)&endpointVolume
+        // );
 
-        //3-7-2026: volume aanpassen
-        if(SUCCEEDED(hr) && endpointVolume)
-        {
-            // Declareer een float vol (gebruik f)
-            float vol = 0.0f;
-            // Roep memberfunctie GetMasterVolumeLevelScalar aan van het COM object waar endpoint Volume naar wijst en geef het adres van de float door
-            endpointVolume->GetMasterVolumeLevelScalar(&vol);
+        // //3-7-2026: volume aanpassen
+        // if(SUCCEEDED(hr) && endpointVolume)
+        // {
+        //     // Declareer een float vol (gebruik f)
+        //     float vol = 0.0f;
+        //     // Roep memberfunctie GetMasterVolumeLevelScalar aan van het COM object waar endpoint Volume naar wijst en geef het adres van de float door
+        //     endpointVolume->GetMasterVolumeLevelScalar(&vol);
 
-            // Geef het volume
-            cout <<"Volume: "<<vol<<endl;
-            // Roep de methode SetMasterVolumeLevelScalar aan op het COM-object waar endpointVolume naar wijst, en zet het volume op 1.0 (100%)
-            // zonder event callback
-            //8-7-26: eruit en verplaatst: endpointVolume->SetMasterVolumeLevelScalar(1.0f, NULL);
-            //volume aanpassen: Roep methode aan op het COM-object waar endpointVolume naar wijst
-            endpointVolume->Release();
-            ;
-        }
+        //     // Geef het volume
+        //     cout <<"Volume: "<<vol<<endl;
+        //     // Roep de methode SetMasterVolumeLevelScalar aan op het COM-object waar endpointVolume naar wijst, en zet het volume op 1.0 (100%)
+        //     // zonder event callback
+        //     //8-7-26: eruit en verplaatst: endpointVolume->SetMasterVolumeLevelScalar(1.0f, NULL);
+        //     //volume aanpassen: Roep methode aan op het COM-object waar endpointVolume naar wijst
+        //     endpointVolume->Release();
+        //     ;
+        // }
 
 
 
@@ -298,6 +297,7 @@ void AudioDeviceManager::getDefaultDevice()
     //8-7-26: Eruit gehaald: IAudioEndpointVolume *endpointVolume = nullptr;
     // Roep op het object defaultDevice de Activate Functie op en geef als parameters door __uuidof(IAudioEndpointVolume, CLSCTX_ALL, NULL en void(**)&endpointerVolume)
     // void(**)&endpointVolume: endpointVolume is een pointer Nog uitzoeken
+    //10-7-2026: Dit kan eruit: En er weer in 
     hr = defaultDevice->Activate(__uuidof(IAudioEndpointVolume),CLSCTX_ALL,NULL,(void**)&endpointVolume);
     // als hr Failed
     if(FAILED(hr))
@@ -323,8 +323,8 @@ void AudioDeviceManager::getDefaultDevice()
     // print het huidige volume
     //cout<<"Het huidige volume is "<< volume << endl;
 
-    //Nu gaan we het mastervolume naar 50% zetten
-    endpointVolume->SetMasterVolumeLevelScalar(0.5f, NULL);
+    // //Nu gaan we het mastervolume naar 50% zetten
+    // endpointVolume->SetMasterVolumeLevelScalar(0.5f, NULL);
 
     // Opruimen: Release: 
     // PropVariantClear, endpointVolume, props, defaultDevice, enumerator
@@ -341,73 +341,37 @@ void AudioDeviceManager::getDefaultDevice()
     enumerator->Release();
 }
 
-void AudioDeviceManager::setVolume(float volume)
+//9-7-2026: Destructor
+// AudioDeviceManager::~AudioDeviceManager()
+// {
+//     if(endpointVolume)
+//     {
+//         endpointVolume->Release();
+//         endpointVolume = nullptr;
+//     }
+
+//     CoUninitialize();
+// }
+
+//10-7-2026: Kan eruit was om te debuggen
+IAudioEndpointVolume* AudioDeviceManager::getEndpointVolume()
 {
-    cout<<"Volume instellen op: "<< volume <<endl;
-   
+    cout << "Endpoint teruggeven: ";
+
     if(endpointVolume)
     {
-        //9-7-2026: debug kan eruit
-        cout<<"EndpointVolume bestaat!"<<endl;
-
-        //9-7-2026: Deze 3 regels zijn debugregels
-        UINT channels = 0;
-        endpointVolume->GetChannelCount(&channels);
-        cout<<"Aantal kanalen: "<<channels<<endl;
-
-
-        cout<<"Ik ga nu windows aanroepen..."<<endl;
-        // Roep op het object endpointVolume de memberfunctie SetMasterVolumeLevelScalar op met parameters volume en null
-        HRESULT hr = endpointVolume->SetMasterVolumeLevelScalar(volume, NULL);
-        // Debug test met mute
-        // HRESULT hr=endpointVolume->SetMute(TRUE,NULL);
-        //9-7-2026: debug kan eruit
-        cout<<"Windows heeft geantwoord"<<endl;
-        cout<<"HRESULT: 0x"<<hex<<hr<<endl;
-        // als gelukt
-        if(SUCCEEDED(hr))
-        {
-            // Bericht: volume succesvol aangepast
-            cout << "volume succesvol aangepast!" <<endl;
-        }
-        // anders
-        else
-        {
-            // Bericht: Volume aanpassen mislukt
-            cout << "volume aanpassen mislukt" <<endl;
-        }
-
+        cout << "bestaat!" << endl;
     }
     else
     {
-        cout<<"Geen volume interface beschikbaar" <<endl;
-    }
-}
-
-//10-7-2026: Deze functie hier geplaats
-float AudioDeviceManager::getVolume()
-{
-    if(!endpointVolume)
-    {
-        return -1.0f;
+        cout << "nullptr!" << endl;
     }
 
-    float volume = 0.0f;
-
-    endpointVolume->GetMasterVolumeLevelScalar(&volume);
-
-    return volume;
+    return endpointVolume;
 }
 
-
-//9-7-2026: Destructor
+//10-7-2026 Wordt:
 AudioDeviceManager::~AudioDeviceManager()
 {
-    if(endpointVolume)
-    {
-        endpointVolume->Release();
-        endpointVolume = nullptr;
-    }
-
-    CoUninitialize();
+    cout<<"AudioDeviceManager afgesloten"<<endl;
 }

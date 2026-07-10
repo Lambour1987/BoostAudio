@@ -16,6 +16,7 @@ class AudioDeviceManager
 
         void listDevices();
         void getDefaultDevice();
+        IAudioEndpointVolume* getEndpointVolume();
         void setVolume(float volume);
         float getVolume();
     private:
