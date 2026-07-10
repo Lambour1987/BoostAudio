@@ -1,0 +1,37 @@
+1-7-2026: Volumeversterker app
+// ML: dit is een .md bestand. dat heeft meer opmaak mogelijkheden dan .txt
+
+We bouwen een Windows C++ audio booster die:
+
+systeemgeluid kan capturen via WASAPI
+audio real-time kan verwerken (DSP)
+volume kan versterken tot ~200%
+later een limiter + UI krijgt
+
+Het project is vooral bedoeld om te leren:
+
+C++ op laag niveau
+Windows API
+COM interfaces
+real-time audio / DSP
+hardware-achtige software (buffers, timing, threads)
+
+Audio Pipeline
+Windows audio output
+        ↓
+WASAPI loopback (capture)
+        ↓
+audio buffer (samples)
+        ↓
+DSP (gain / limiter)
+        ↓
+WASAPI render (output)
+        ↓
+speakers
+
+We gaan bouwen:
+AudioEngine → centrale controller
+WasapiCapture → audio input (systeemgeluid)
+WasapiRender → audio output
+DSP → gain + limiter
+UI (later) → slider 0–200%
