@@ -8,7 +8,7 @@
 
 using namespace std;
 
-AudioCapture::AudioCapture()
+AudioCapture::AudioCapture():ringBuffer(48000)
 {
     // Roep de functie CoInitalize op met argument NULL. Als niet gelukt geef aan de initialisatie voor AudioCapture mislukt is
     // BELANGRIJK: Let op coInitialize staat ook in AudioStream: maar dit gaat om een andere thread!
@@ -269,7 +269,7 @@ void AudioCapture::captureLoop()
         process();
     }
     // bericht dat AudioCapture Thread is gestopt
-    cout<<"audioCapture Thread is gestopt";
+    cout<<"AudioCapture Thread is gestopt"<<endl;
 }
     // functie process die niets teruggeeft
 void AudioCapture::process()
@@ -378,6 +378,12 @@ void AudioCapture::process()
         // // Toon de tweede sample: Bericht: AUdioCapture: Right sample
         // cout<<"AudioCapture: Right sample: "<<rightSample<<endl;
     
+        //30-7-2026 Erbij geet
+        ringBuffer.write(samples,numFramesAvailable);
+
+
+        //30-7-2026: Debug
+        cout<<"AudioCapture: Frames in Ringbuffer: "<<ringBuffer.availableToRead()<<endl;
     
     // ---------------------------------------------------------------------------------------------------------
     //

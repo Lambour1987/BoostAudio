@@ -23,15 +23,19 @@ class RingBuffer
 
         size_t availableToWrite() const;
 
+        void write(const float* data, size_t frameCount);
+
+        size_t read(float* destination, size_t frameCount);
+
     private:
 
         std::vector<float> buffer;
 
-        size_t capacity;
+        size_t capacity =0;
 
-        size_t readIndex;
+        size_t readIndex = 0;
 
-        size_t writeIndex;
+        size_t writeIndex =0;
 
         size_t size = 0;
 };
