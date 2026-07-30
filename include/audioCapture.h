@@ -29,6 +29,7 @@ class AudioCapture
         IMMDevice* device = nullptr;
         IAudioClient* audioClient = nullptr;
         IAudioCaptureClient* captureClient = nullptr;
+        
 
         WAVEFORMATEX* waveFormat = nullptr;
 
@@ -37,4 +38,6 @@ class AudioCapture
         std::atomic<bool> running = false;
 
         std::thread captureThread;
+        //30-7-26: Tijdelijk
+        float volumeBoost = 2.0f;
 };

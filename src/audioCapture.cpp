@@ -275,8 +275,156 @@ void AudioCapture::captureLoop()
 void AudioCapture::process()
 {
     //29-7-2026: Wel iets uitgewerkt anders krijgen we een 'busy loop': hoog CPU gebruik
-
     //this_thread::sleep_for(chrono::milliseconds(10));
-    this_thread::sleep_for(chrono::milliseconds(10));
+    //this_thread::sleep_for(chrono::milliseconds(10));
+
+    // --------------------------------------------------------------------------------------------------------------------
+    //
+    // 1. Controleer of er een nieuw audiopakket beschikbaar is
+    //
+    // --------------------------------------------------------------------------------------------------------------------
+
+    //30-7-2026 maak een variabele packetlength en initialiseer op 0
+    UINT32 packetLength = 0;
+    // Roep  de memberfunctie GetNextPacketSize op waar de pointer captureClient naar wijst en geef als argument mee de 
+    // referentie packetlenght. Sla het resultaat op in variabele hr (datatype HResult)
+    HRESULT hr = captureClient->GetNextPacketSize(&packetLength);
+    //als hr faalt, 
+    if(FAILED(hr))
+    {
+        // bericht: Packetgrootte ophalen mislukt en return
+        cout<<"AudioCapture: Packet grootte ophalen mislukt! "<<endl;
+        return;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------
+    //
+    // 2. Als er geen pakket is, hoeven we niets te doen
+    //
+    // --------------------------------------------------------------------------------------------------------------------
+
+    if(packetLength==0)
+    {
+        return;
+    }
+
+    // als packetlengte groter is dan 0
+    //if(packetLength>0)
+    //{
+    // Bericht: Nieuw audio pakket, geef lente in frames
+    cout<<"AudioCapture: Nieuw Audiopakket! "<<packetLength<< " frames"<<endl;
+
+    // --------------------------------------------------------------------------------------------------------------------
+    //
+    // 3. Vraag de daadwerkelijke audiobuffer op
+    //
+    // --------------------------------------------------------------------------------------------------------------------
+
+    // Maak een pointer genaamd data naar een object van Byte dat nog gemaakt moet worden.
+    BYTE* data = nullptr;
+    // Maak een variabele numFrames van het type UINT32 en zet deze op 0: Hierin komt het aantal frames dat 
+    // we uit de buffer ophalen
+    // UINT32 numFrames = 0;
+    UINT32 numFramesAvailable = 0;
+
+    // Maak een variabele flags van het type DWORD
+    DWORD flags = 0;
+
+    // Vraag audiobuffer op en sla op in de variabele hr. Roep via de pointer captureClient de memberfunctie GetBuffer op
+    // en geef als parameters mee, de referenties naar data, numFrames, flags en nullptrs.
+    hr = captureClient->GetBuffer(&data, &numFramesAvailable, &flags, nullptr,nullptr);
+
+    // Als de getBuffer faalt
+    if(FAILED(hr))
+    {
+        cout<<"AudioCapture: Buffer ophalen mislukt! "<<endl;
+
+        return;
+    }
+    
+    cout<<"AudioCapture: Buffer ontvangen! "<<numFramesAvailable<<" frames"<<endl;
+
+    // --------------------------------------------------------------------------------------------------------------------
+    //
+    // 4. Controleer of de buffer stiltesamples bevat
+    //
+    // --------------------------------------------------------------------------------------------------------------------    
+
+    // als audio-buffer door windows als stil wordt gemarkeerd, bericht
+    if(flags & AUDCLNT_BUFFERFLAGS_SILENT)
+    {
+        cout<<"AudioCapture: Buffer bevat stilte!"<<endl;
+    }
+    else
+    {
+        // ---------------------------------------------------------------------------------------------------------
+        //
+        // 5. Interpreteer de ruwe bytes als 32-bit floats
+        //
+        // ---------------------------------------------------------------------------------------------------------
+
+        //30-7-26: Interpretatie van onze audio 32-bit als floats. 
+        //Behandel de data waar de pointer 'data' naar verwijst als float, wen verwijs daarnaar met een pointer sample
+        float*samples = reinterpret_cast<float*>(data);
+
+        // er weer uit:
+            // //linkerkanaal
+        // float leftSample = samples[0];
+        // //rechterkanaal
+        // float rightSample = samples[1];
+        // // Toon de eerste samples: Bericht: AudioCapture: Left Sample
+        // cout<<"AudioCapture: Left sample: "<<leftSample<<endl;
+
+        // // Toon de tweede sample: Bericht: AUdioCapture: Right sample
+        // cout<<"AudioCapture: Right sample: "<<rightSample<<endl;
+    
+    
+    // ---------------------------------------------------------------------------------------------------------
+    //
+    // 6. Bereken hoeveel samples we hebben
+    //
+    // ---------------------------------------------------------------------------------------------------------
+
+        const UINT32 channels = waveFormat->nChannels;
+
+        const UINT32 totalSamples = numFramesAvailable * channels;
+
+    // ---------------------------------------------------------------------------------------------------------
+    //
+    // 7. Interpreteer de ruwe bytes als 32-bit floats
+    //
+    // ---------------------------------------------------------------------------------------------------------
+
+        // Loop door samples
+        for(UINT32 i=0; i<totalSamples;i++)
+        {
+            //Lees het oorspronkelijke sample
+            float sample = samples[i];
+
+            // Pas de volume Boost toe
+            float boostedSample = sample* volumeBoost;
+
+            // Sla het versterkte sample terug op
+            samples[i] = boostedSample;
+        }
+    }
+
+        // ---------------------------------------------------------------------------------------------------------
+        //
+        // 8. Geef de Buffer vrij
+        //
+        // ---------------------------------------------------------------------------------------------------------
+
+       
+    //Geef aan WASAPI door dat we klaar zijn met deze buffer
+    hr = captureClient->ReleaseBuffer(numFramesAvailable);
+
+    // Als ReleaseBuffer faalt
+    if(FAILED(hr))
+    {
+        // Buffer vrijgeven mislukt
+        cout<<"AudioCapture: ReleaseBuffer mislukt!"<<endl;
+        return;
+    }
 }
 
