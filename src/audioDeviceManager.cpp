@@ -1,5 +1,8 @@
 // 7-7-2026: audioDeviceManager.cpp
 
+//18-7-2026: GUID definitie
+#define INITGUID
+
 #include "audioDeviceManager.h"
 #include <iostream>
 
@@ -129,13 +132,7 @@ void AudioDeviceManager::listDevices()
     cout<<"Audio Devices gevonden: " << count << "\n";
     // Doorloop de lijst met gevonden devices
 
-    //3-7-2026: Device info
-    //Maak een array deviceList met ruimte voor 10 pointers naar IMMDevice-objecten
-
-    //Maak een array volumeList met ruimte voor 10 pointers naar IAudioEndpointVolume
-
-    //Maak een array volumeCache met ruimte voor 10 float-waarden
-
+   
     for(int i=0; i<count;i++)
     {
         // maak een pointer devices naar IMMdevice en zet op 0

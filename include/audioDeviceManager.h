@@ -17,8 +17,9 @@ class AudioDeviceManager
         void listDevices();
         void getDefaultDevice();
         IAudioEndpointVolume* getEndpointVolume();
-        void setVolume(float volume);
-        float getVolume();
+        //17-7-2026: Kan eruit
+        // void setVolume(float volume);
+        // float getVolume();
     private:
         IAudioEndpointVolume* endpointVolume = nullptr;
 };

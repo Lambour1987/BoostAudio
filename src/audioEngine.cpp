@@ -20,7 +20,22 @@
 #include "audioDeviceManager.h"
 #include "audioVolumeController.h"
 
+
 using namespace std;
+
+//17-7-2026: Constructor voor de AudioEngine
+AudioEngine::AudioEngine()
+{
+    //doorloop devices uit de array
+    for(int i=0; i<MAX_DEVICES;i++)
+    {
+        //Initialiseer devicelist en volumelist op nullptr en de volumeCache op 0.0f.
+        deviceList[i]=nullptr;
+        volumeList[i]=nullptr;
+        volumeCache[i]=0.0f;
+    }
+    cout<<"AudioEngine aangemaakt"<<endl;
+}
 
 //uit de class AudioEngine de functie start gaan we maken
 void AudioEngine::start()
@@ -59,9 +74,34 @@ void AudioEngine::start()
     //8-7-2026
     volumeController.setVolume(0.8f);
 
-    //10-7-2026
-    volumeController.setMute(true);
+    //10-7-2026. Op 19-7-2026: weer op false gezet
+    volumeController.setMute(false);
     
+    //19-7-2026: 
+    if(audioStream.initialize())
+    {
+        cout<<"AudioStream succesvol geinitialiseerd!"<<endl;
+
+        //29-7-2026
+        audioStream.start();
+    }
+    else
+    {
+        cout<<"AudioStream initialisatie mislukt"<<endl;
+    }
+
+    //29-7-2026: Toegevoegd t.b.v. AudioCapture:
+    if(audioCapture.initialize())
+    {
+        cout<<"AudioCapture succesvol geinitialiseerd!" <<endl;
+
+        audioCapture.start();
+    }
+    else
+    {
+        cout<<"AudioCapture initialisatie mislukt!" <<endl;
+    }
+
     //MessageBoxA()
     MessageBoxA(NULL, "BoostAudio draait", "Info", MB_OK);
 
@@ -75,3 +115,8 @@ void AudioEngine::stop()
 
 }
 
+//18-7-2026: Destructor 
+AudioEngine::~AudioEngine()
+{
+    cout<<"AudioEngine afgesloten!" << endl;
+}

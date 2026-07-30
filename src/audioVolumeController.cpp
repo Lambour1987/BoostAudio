@@ -129,7 +129,7 @@ AudioVolumeController::~AudioVolumeController()
     
     if(endpointVolume)
     {
-        endpointVolume->Release();
+        //17-7-2026: eruit: endpointVolume->Release();
         endpointVolume=nullptr;
     }
 

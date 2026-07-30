@@ -1,2 +1,81 @@
 3-7-2026:
-proberen dit programma up te loaden en dat mensen het kunnen downloaden en wat moet ik erbij aangeven
+
+17-7-2026: Ook te kopieren naar chat voor vervolg
+Ik ben bezig met een C++ project genaamd boostAudio.
+
+Het doel van boostAudio is om het Windows-audiovolume te kunnen verhogen boven de normale limiet van 100%, bijvoorbeeld tot 200% volume. De reden hiervoor is dat mijn laptops (ook eerdere modellen) niet hard genoeg konden spelen, terwijl de Windows-volumeregeling stopt bij 100%.
+
+Ik ben begonnen met het bouwen van de basislaag voor Windows-audio:
+
+AudioDeviceManager
+gebruikt de Windows MMDevice API
+zoekt audio-output devices
+haalt het standaard audioapparaat op
+gebruikt COM interfaces zoals:
+IMMDeviceEnumerator
+IMMDevice
+IAudioEndpointVolume
+AudioVolumeController
+bestuurt momenteel het Windows-mastervolume
+functies:
+volume uitlezen
+volume instellen
+mute aan/uit zetten
+AudioEngine
+centrale klasse die de audiomodules aanstuurt
+main.cpp
+maakt een AudioEngine object
+start de engine
+
+boostAudio
+
+main.cpp
+    |
+    v
+AudioEngine
+    |
+    +-- AudioDeviceManager
+    |       |
+    |       +-- Windows MMDevice API
+    |
+    +-- AudioVolumeController
+            |
+            +-- IAudioEndpointVolume
+
+            Belangrijk inzicht:
+IAudioEndpointVolume kan alleen het bestaande Windows-volume regelen van 0% tot 100%. Hiermee kan ik dus niet echt naar 200% gaan.
+
+Om het echte doel te bereiken moet ik waarschijnlijk een audio-processing laag bouwen:
+
+Audio bron
+(Spotify/game/browser/etc.)
+        |
+        v
+boostAudio DSP engine
+        |
+        v
+Gain/versterking (bijv. x2.0)
+        |
+        v
+Windows audio output
+        |
+        v
+Speakers
+
+De echte boost moet dus gebeuren door het audiosignaal te versterken, niet door de Windows-volumeknop hoger te zetten.
+
+De volgende stap is om de huidige architectuur uit te breiden richting een echte audio-engine met bijvoorbeeld:
+
+WASAPI audio capture/render
+audio buffers verwerken
+gain processor (sample * 2.0f)
+eventueel een virtueel audio device zodat alle Windows-audio door boostAudio gaat
+
+Ik heb momenteel al deze bestanden:
+
+audioDeviceManager.cpp
+audioEngine.cpp
+audioVolumeController.cpp
+main.cpp
+
+Ik moet nog de .h bestanden bekijken en daarna bepalen hoe de architectuur het beste uitgebreid kan worden.
